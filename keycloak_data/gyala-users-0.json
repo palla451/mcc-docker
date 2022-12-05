@@ -1,0 +1,27 @@
+{
+  "realm" : "gyala",
+  "users" : [ {
+    "id" : "8c626558-d2ff-4675-90ea-0a78299f985f",
+    "createdTimestamp" : 1670246952326,
+    "username" : "administrator",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "aaa",
+    "lastName" : "bb",
+    "email" : "admin@gyala.it",
+    "credentials" : [ {
+      "id" : "51172465-f712-4dee-b6b2-746021730613",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1670246983840,
+      "secretData" : "{\"value\":\"io/cDIguTL/RYGM/WxQJ4MgKDiU0ChUyREqWgljOF4S7E41k5/v3UPqyhIiU0Tw1vR8jHqMWtte6FMijUDzUYg==\",\"salt\":\"HS4bCnyLTfbjVvoSiRtXAA==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-gyala" ],
+    "notBefore" : 0,
+    "groups" : [ "/AdminGroup" ]
+  } ]
+}

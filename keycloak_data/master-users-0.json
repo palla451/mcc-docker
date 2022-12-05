@@ -1,0 +1,27 @@
+{
+  "realm" : "master",
+  "users" : [ {
+    "id" : "af53b637-bd6c-452f-8847-8fa7bef04a77",
+    "createdTimestamp" : 1670246186279,
+    "username" : "admin",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "credentials" : [ {
+      "id" : "0040e16a-fe50-4f96-aa2c-c1d2d5954e5b",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1670256610369,
+      "secretData" : "{\"value\":\"tkAJuUCoJ8T5bBeFLz+Z4Nin5tjggiM7ihEA9hcSKkWfOVXpgHMfuUZ3oOKKCu2i9VrHGJmPARHQaE5DQyBA8w==\",\"salt\":\"if48Sc40v8PBH0GG9l/MBg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ "UPDATE_PASSWORD" ],
+    "realmRoles" : [ "default-roles-master", "admin" ],
+    "clientRoles" : {
+      "gyala-realm" : [ "create-client", "view-users", "view-realm", "manage-clients", "view-events", "manage-authorization", "manage-realm", "manage-events", "query-users", "query-realms", "query-clients", "query-groups", "view-identity-providers", "view-authorization", "manage-identity-providers", "view-clients", "manage-users" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  } ]
+}
