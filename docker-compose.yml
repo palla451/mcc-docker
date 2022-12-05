@@ -1,0 +1,160 @@
+version: "3.7"
+
+services:
+  mcc:
+    build:
+      args:
+        user: agger
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: mcc
+    user: 1000:1000
+    container_name: mcc
+    restart: unless-stopped
+    working_dir: /var/www/mcc-be
+    volumes:
+      - ./www:/var/www
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - nginx
+      - mcc-db
+    networks:
+      - gyala
+    extra_hosts:
+      - "cos_test:172.16.50.101"
+
+  mcc-db:
+    image: mysql:5.7
+    container_name: mcc-db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: mcc
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: admin
+      MYSQL_USER: admin
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      - gyala
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "8181:80"
+    depends_on:
+      - mcc-db
+    networks:
+      - gyala
+
+  nginx:
+    image: nginx:alpine
+    container_name: mcc-nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+      - "8080:8080"
+    volumes:
+      - ./www:/var/www/
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - gyala
+
+  npm:
+    image: node:14.18
+    working_dir: /var/www/mcc-fe
+    entrypoint: ["npm"]
+    volumes:
+      - ./www/:/var/www/
+    networks:
+      - gyala
+
+  redis:
+    image: redis:4.0
+    container_name: app_redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--bind", "redis", "--port", "6379"]
+    networks:
+      - gyala
+
+  websockets:
+    build:
+      context: ./
+      dockerfile: websockets.dockerfile
+    container_name: mcc-websockets
+    restart: unless-stopped
+    working_dir: /var/www/mcc-be
+    depends_on:
+      - redis
+    volumes:
+      - ./www/mcc-be:/var/www/mcc-be
+    ports:
+      - "6001:6001"
+    networks:
+      - gyala
+
+  supervisor:
+    build:
+      context: .
+      dockerfile: ./supervisor/dockerfile
+    container_name: supervisor
+    depends_on:
+      - nginx
+      - mcc
+    volumes:
+      - ./www/mcc-be:/var/www/mcc-be
+    networks:
+      - gyala
+
+  postgres:
+    image: postgres
+    container_name: gyala_keycloak_postgres
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    networks:
+      - gyala
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: gyala_keycloak
+    volumes:
+      - ./keycloak_data:/var/lib/keycloak/data
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_SCHEMA: public
+      DB_PASSWORD: password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command:
+      - "start-dev --db=postgres --db-url=jdbc:postgresql://postgres/keycloak --db-username=keycloak --db-password=password"
+    ports:
+      - "8282:8080"
+    networks:
+      - gyala
+    depends_on:
+      - postgres
+
+#volumes:
+#  postgres_data:
+#    driver: local
+#  mysql_data:
+#    driver: local
+
+networks:
+  gyala:
+    driver: bridge
