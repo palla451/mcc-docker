@@ -28,29 +28,29 @@ services:
     image: mysql:5.7
     container_name: mcc-db
     restart: unless-stopped
-    ports:
-      - "3306:3306"
+#    ports:
+#      - "33006:3306"
     environment:
       MYSQL_DATABASE: mcc
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_PASSWORD: admin
       MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
-    volumes:
-      - ./mysql_data:/var/lib/mysql
+#    volumes:
+#      - ./mysql_data:/var/lib/mysql
     networks:
       - gyala
 
-  phpmyadmin:
-    image: phpmyadmin
-    restart: always
-    ports:
-      - "8181:80"
-    depends_on:
-      - mcc-db
-    networks:
-      - gyala
+#  phpmyadmin:
+#    image: phpmyadmin
+#    restart: always
+#    ports:
+#      - "8181:80"
+#    depends_on:
+#      - mcc-db
+#    networks:
+#      - gyala
 
   nginx:
     image: nginx:alpine
@@ -67,6 +67,7 @@ services:
 
   npm:
     image: node:14.18
+    container_name: mcc-npm
     working_dir: /var/www/mcc-fe
     entrypoint: ["npm"]
     volumes:
@@ -76,9 +77,9 @@ services:
 
   redis:
     image: redis:4.0
-    container_name: app_redis
-    ports:
-      - "6379:6379"
+    container_name: mcc-redis
+#    ports:
+#      - "6379:6379"
     command: ["redis-server", "--bind", "redis", "--port", "6379"]
     networks:
       - gyala
@@ -103,7 +104,7 @@ services:
     build:
       context: .
       dockerfile: ./supervisor/dockerfile
-    container_name: supervisor
+    container_name: mcc-supervisor
     depends_on:
       - nginx
       - mcc
@@ -112,44 +113,52 @@ services:
     networks:
       - gyala
 
-  postgresql:
-    container_name: gyala_keycloak_postgres_b
-    image: docker.io/bitnami/postgresql:11
-    environment:
-      # ALLOW_EMPTY_PASSWORD is recommended only for development.
-      - ALLOW_EMPTY_PASSWORD=no
-      - POSTGRESQL_USERNAME=admin
-      - POSTGRESQL_PASSWORD=admin
-      - POSTGRESQL_DATABASE=keycloak
-    #    ports:
-    #      - "5432:5432"
+  postgres:
+    image: postgres
+    container_name: mcc-keycloak-postgres
     volumes:
-      - postgresql_data:/bitnami/postgresql
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+#    ports:
+#      - "5432:5432"
     networks:
       - gyala
 
   keycloak:
-    container_name: gyala_keycloak_b
-    image: docker.io/bitnami/keycloak:20
-    environment:
-      - KEYCLOAK_DATABASE_PASSWORD=admin
-      - KEYCLOAK_ADMIN_USER=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-      - KEYCLOAK_DATABASE_NAME=keycloak
-      - KEYCLOAK_DATABASE_USER=admin
+    image: quay.io/keycloak/keycloak:latest
+    container_name: mcc-keycloak
     volumes:
       - ./keycloak_data:/var/keycloakdata
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_SCHEMA: public
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: password
+      KEYCLOAK_HOSTNAME_STRICT: 0
+    command:
+      #      - "start-dev --db=postgres --db-url=jdbc:postgresql://postgres/keycloak --db-username=keycloak --db-password=password"
+      - "start-dev"
     ports:
-      - "8282:8080"
+      - "8090:8080"
     networks:
       - gyala
     depends_on:
-      - postgresql
+      - postgres
 
 volumes:
-  postgresql_data:
+  postgres_data:
     driver: local
 
 networks:
   gyala:
     driver: bridge
+#    ipam:
+#      driver: default
+#      config:
+#        - subnet: 10.103.0.0/16

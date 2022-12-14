@@ -1,0 +1,4 @@
+keycloak_data/*
+mysql_data/*
+www/*
+.idea/*
