@@ -29,7 +29,7 @@ services:
     container_name: mcc-db
     restart: unless-stopped
 #    ports:
-#      - "33006:3306"
+#      - "3306:3306"
     environment:
       MYSQL_DATABASE: mcc
       MYSQL_ROOT_PASSWORD: root
@@ -158,7 +158,7 @@ volumes:
 networks:
   gyala:
     driver: bridge
-#    ipam:
-#      driver: default
-#      config:
-#        - subnet: 10.103.0.0/16
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.103.0.0/16
